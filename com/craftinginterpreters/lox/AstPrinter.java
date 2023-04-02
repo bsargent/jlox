@@ -49,7 +49,11 @@ class AstPrinter implements Expr.Visitor<String> {
                         new Expr.Literal(123)),
                 new Token(TokenType.STAR, "*", null, 1),
                 new Expr.Grouping(
-                        new Expr.Literal(45.67)));
+                        new Expr.Binary (
+                            new Expr.Literal(27.4),
+                            new Token(TokenType.MINUS, "-", null, 1),
+                            new Expr.Literal(45.67))
+        ));
 
         System.out.println(new AstPrinter().print(expression));
     }
