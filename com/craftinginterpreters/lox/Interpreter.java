@@ -1,15 +1,19 @@
 package com.craftinginterpreters.lox;
 
-class Interpreter implements Expr.Visitor<Object> {
+import java.util.List;
 
-    void interpret(Expr expression) { 
+class Interpreter implements Expr.Visitor<Object>,
+        Stmt.Visitor<Void> {
+
+    void interpret(List<Stmt> statements) {
         try {
-          Object value = evaluate(expression);
-          System.out.println(stringify(value));
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
         } catch (RuntimeError error) {
-          Lox.runtimeError(error);
+            Lox.runtimeError(error);
         }
-      }
+    }
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -23,6 +27,23 @@ class Interpreter implements Expr.Visitor<Object> {
 
     private Object evaluate(Expr expr) {
         return expr.accept(this);
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
+      }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+        return null;
     }
 
     @Override
@@ -116,18 +137,20 @@ class Interpreter implements Expr.Visitor<Object> {
 
         return a.equals(b);
     }
+
     private String stringify(Object object) {
-        if (object == null) return "nil";
-    
+        if (object == null)
+            return "nil";
+
         if (object instanceof Double) {
-          String text = object.toString();
-          if (text.endsWith(".0")) {
-            text = text.substring(0, text.length() - 2);
-          }
-          return text;
+            String text = object.toString();
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+            return text;
         }
-    
+
         return object.toString();
-      }
+    }
 
 }
